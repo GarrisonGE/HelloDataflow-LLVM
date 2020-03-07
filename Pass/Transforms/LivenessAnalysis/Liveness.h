@@ -1,0 +1,31 @@
+#include "llvm/IR/Function.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/GlobalObject.h"
+#include "llvm/IR/GlobalValue.h"
+#include "llvm/IR/OperandTraits.h"
+#include "llvm/IR/SymbolTableListTraits.h"
+#include "llvm/IR/CFG.h"
+#include "llvm/IR/Value.h"
+#include "llvm/IR/ValueMap.h"
+#include "llvm/IR/ValueSymbolTable.h"
+#include "llvm/Pass.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Instruction.h"
+#include "llvm/ADT/StringMap.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/ilist_node.h"
+#include "llvm/ADT/iterator_range.h"
+#include<fstream>
+#include<iostream>
+#include <map>
+#include <string>
+#include <vector>
+#include <set>
+#include <unordered_map>
+#include <algorithm>
+#include <list>
+#include <utility>
+#include <iterator>
