@@ -1,0 +1,1 @@
+opt -load ../Pass/build/libLivenessAnalysis.so -Liveness <2.ll> /dev/null  2> 2.out    

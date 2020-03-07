@@ -7,8 +7,6 @@ using namespace std;
 
 using namespace llvm;
 
-set<string> opSkip = {"br", "ret","icmp"};
-
 namespace {
 struct Liveness : public FunctionPass {
     string func_name = "test";
@@ -64,16 +62,18 @@ struct Liveness : public FunctionPass {
             VK.insert(make_pair(&basic_block,VKName));
             
         }
+        //compute the sets LIVEOUT of each basic block
         map<BasicBlock*, set<llvm::StringRef>>::iterator lit;
-        for (BasicBlock &BB : F) 
+        // push basic bolck into worklist
+        for (BasicBlock &basic_block : F) 
         {
             set<StringRef> LIVEOUT;
-            LO.insert(std::pair<BasicBlock*, std::set<llvm::StringRef>>(&BB,LIVEOUT));
-            workList.push_back(&BB);
+            LO.insert(std::pair<BasicBlock*, std::set<llvm::StringRef>>(&basic_block,LIVEOUT));
+            workList.push_back(&basic_block);// push back since we calculate the LIVEOUT backward
         }
         while (!workList.empty()) 
         {
-            BasicBlock* tmp = workList.front();// BB pointer
+            BasicBlock* tmp = workList.front();// basic_block pointer
             workList.pop_front();
             map<BasicBlock*, set<llvm::StringRef>>::iterator it; 
             it = LO.find(tmp);
@@ -83,7 +83,7 @@ struct Liveness : public FunctionPass {
             set<llvm::StringRef> resultSet;// result LIVEOUT
             for (int i = 0, NSucc = TInst->getNumSuccessors(); i < NSucc; i++)
             {
-                BasicBlock* succ = TInst->getSuccessor(i);// get BB pointer
+                BasicBlock* succ = TInst->getSuccessor(i);// get basic_block pointer
                 // get successor's LIVEOUT/VARKILL/UEVAR
                 set<llvm::StringRef> LIVEOUT = LO.find(succ)->second;
                 set<llvm::StringRef> VarKill = VK.find(succ)->second;
@@ -95,7 +95,7 @@ struct Liveness : public FunctionPass {
                 }
                 std::set_union(UEVar.begin(), UEVar.end(), subtrSet.begin(),subtrSet.end(), std::inserter(resultSet, resultSet.begin()));
             }
-            LO.erase(it);// update the LIVEOUT for this BB
+            LO.erase(it);// update the LIVEOUT for this basic_block
             LO.insert(std::pair<BasicBlock*, std::set<llvm::StringRef>>(tmp,resultSet));
             if (resultSet != originLIVEOUT) 
             {
@@ -107,16 +107,17 @@ struct Liveness : public FunctionPass {
                 }
             }
         }
-        for (auto& BB : F)
+        // output the UEVAR, VARKILL, LIVEOUT sets of each basic block
+        for (auto& basic_block : F)
         {
-            BasicBlock* key_BB = &BB;
-            set<StringRef> VarKill = VK.find(key_BB)->second;
-            set<StringRef> UEVar = UE.find(key_BB)->second;
-            set<StringRef> LIVEOUT = LO.find(key_BB)->second;
-            errs() << "----- "<< key_BB->getName() << " -----\n";
+            BasicBlock* key_basic_block = &basic_block;
+            set<StringRef> VarKill = VK.find(key_basic_block)->second;
+            set<StringRef> UEVar = UE.find(key_basic_block)->second;
+            set<StringRef> LIVEOUT = LO.find(key_basic_block)->second;
+            errs() << "----- "<< key_basic_block->getName() << " -----\n";
             errs() << "UEVAR: ";
             resultOut.append("----- ");
-            resultOut.append(key_BB->getName());
+            resultOut.append(key_basic_block->getName());
             resultOut.append(" -----\n");
             resultOut.append("UEVAR: ");
             for (set<StringRef>::iterator it = UEVar.begin(); it != UEVar.end(); it++) 
